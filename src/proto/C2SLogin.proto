@@ -1,0 +1,6 @@
+message C2SLogin
+{
+	required string	uid = 1;
+	required string gid = 2;
+	required string name = 3;
+}

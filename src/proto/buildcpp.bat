@@ -1,0 +1,1 @@
+protoc25.exe --cpp_out=./ -I ./ *.proto

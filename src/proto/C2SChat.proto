@@ -1,0 +1,5 @@
+message C2SChat
+{
+	required string	uid = 1;
+	required string	ctx = 2;
+}

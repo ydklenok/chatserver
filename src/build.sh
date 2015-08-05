@@ -1,0 +1,1 @@
+g++ -g -Wno-deprecated -o leafd -I/usr/local/include -L/usr/local/lib -levent -lprotobuf Chat.pb.cc  LeafNetHandler.cpp  LeafProtocolHandler.cpp  main.cpp  mutlclt.cpp  NetHandler.cpp  ProtocolHandler.cpp  RelayNetHandler.cpp  StringUtil.cpp  StructUtil.cpp handle/BaseHandle.cpp  handle/ChatHandle.cpp  handle/LoginHandler.cpp proto/C2SChat.pb.cc  proto/C2SLogin.pb.cc

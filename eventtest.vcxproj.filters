@@ -1,0 +1,102 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="源文件">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="头文件">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="资源文件">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="源文件\proto">
+      <UniqueIdentifier>{25807ef9-b16d-4031-ac5f-876c7549fe82}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\handle">
+      <UniqueIdentifier>{ab14e170-10f3-47b9-b30e-ca9e9397e71d}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\ProtocolHandler.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\handle\BaseHandle.cpp">
+      <Filter>源文件\handle</Filter>
+    </ClCompile>
+    <ClCompile Include="src\handle\ChatHandle.cpp">
+      <Filter>源文件\handle</Filter>
+    </ClCompile>
+    <ClCompile Include="src\NetHandler.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\main.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\StructUtil.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\StringUtil.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\LeafProtocolHandler.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\LeafNetHandler.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\handle\LoginHandler.cpp">
+      <Filter>源文件\handle</Filter>
+    </ClCompile>
+    <ClCompile Include="src\proto\C2SChat.pb.cc">
+      <Filter>源文件\proto</Filter>
+    </ClCompile>
+    <ClCompile Include="src\proto\C2SLogin.pb.cc">
+      <Filter>源文件\proto</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\ProtocolHandler.h">
+      <Filter>源文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ConstDefine.h">
+      <Filter>源文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\handle\BaseHandle.h">
+      <Filter>源文件\handle</Filter>
+    </ClInclude>
+    <ClInclude Include="src\handle\ChatHandle.h">
+      <Filter>源文件\handle</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Command.h">
+      <Filter>源文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\NetHandler.h">
+      <Filter>源文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\StructUtil.h">
+      <Filter>源文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\StringUtil.h">
+      <Filter>源文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\LeafProtocolHandler.h">
+      <Filter>源文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\LeafNetHandler.h">
+      <Filter>源文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\handle\LoginHandler.h">
+      <Filter>源文件\handle</Filter>
+    </ClInclude>
+    <ClInclude Include="src\proto\C2SChat.pb.h">
+      <Filter>源文件\proto</Filter>
+    </ClInclude>
+    <ClInclude Include="src\proto\C2SLogin.pb.h">
+      <Filter>源文件\proto</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

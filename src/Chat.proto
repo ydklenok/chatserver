@@ -1,0 +1,5 @@
+message Chat
+{
+	required int32	uid = 1;
+	required string	ctx = 2;
+}
