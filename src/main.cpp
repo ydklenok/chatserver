@@ -12,4 +12,5 @@ int main(int argc, char *argv[])
         LeafNetHandler *nh = new LeafNetHandler(LEAF_READ_SIZE_MAX);
         LeafProtocolHandler *cph = new LeafProtocolHandler(nh);
         cph->loop();
+		return 0;
 }
