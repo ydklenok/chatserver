@@ -29,4 +29,7 @@ namespace __gnu_cxx
 using namespace stdext;
 #endif
 
+#include <event2/bufferevent.h>
+typedef struct bufferevent BufferEvent;
+
 #endif

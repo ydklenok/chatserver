@@ -27,18 +27,19 @@ class ProtocolHandler;
 class NetHandler
 {
 public:
-        NetHandler(size_t rsize);
+        NetHandler();
         ~NetHandler();
 
         void    protocol(ProtocolHandler *ph){ph_ = ph;};
         void    loop();
         bool    write(int fd, const void *data, size_t size);
+        bool    write(BufferEvent *bev, const void *data, size_t size);
 
-        void    onEvent(struct bufferevent *bev, short events);
-        void    onRead(struct bufferevent *bev);
+        void    onEvent(BufferEvent *bev, short events);
+        void    onRead(BufferEvent *bev);
         void    onAccept(struct evconnlistener *listener, evutil_socket_t fd, struct sockaddr *address, int socklen);
         void    onErrorAccept(struct evconnlistener *listener);
-        void    removeConnection(int fd);
+        void    freeBufferEvent(BufferEvent *bev);
 
         virtual void init() = 0;
 
@@ -46,17 +47,12 @@ protected:
         int     createConnection(string host, int port);
         int     createListen(int port);
         int     parserRecord(struct evbuffer *buf, string &record);
-        void    removeConnection(struct bufferevent *bev);
 
 private:
         struct event_base       *base_;
         ProtocolHandler         *ph_;
-        char                    *rbuf_;
 
         const static size_t     RECORD_HEADER_LEN = 4;
-        size_t                  rsize_;
-
-        hash_map<int, struct bufferevent*>      bevMap_;
 };
 
 #endif

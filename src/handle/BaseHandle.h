@@ -5,6 +5,7 @@
 
 #include "../ProtocolHandler.h"
 #include "../Command.h"
+#include "../StructUtil.h"
 
 #define RegistEvent(className, cmd) \
 static void createInstance(ProtocolHandler* ph) \
@@ -18,9 +19,9 @@ static className* getInstance()\
         static className ins;\
         return &ins;\
 }\
-static void handle_(string &content)\
+static void handle_(BufferEvent* bev, string &content)\
 {\
-        className::getInstance()->handle(content);\
+        className::getInstance()->handle(bev, content);\
 }
 
 using namespace std;

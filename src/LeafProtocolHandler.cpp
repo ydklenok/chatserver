@@ -1,5 +1,6 @@
 #include "LeafProtocolHandler.h"
 #include "handle/ChatHandle.h"
+#include "handle/LoginHandle.h"
 
 #ifdef _WIN32
 #include <WinSock2.h>
@@ -15,5 +16,6 @@ LeafProtocolHandler::LeafProtocolHandler(LeafNetHandler *nh)
 
 void LeafProtocolHandler::init()
 {
+        LoginHandle::createInstance(this);
         ChatHandle::createInstance(this);
 }

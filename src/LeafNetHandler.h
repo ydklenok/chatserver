@@ -6,7 +6,7 @@
 class LeafNetHandler : public NetHandler
 {
 public:
-        LeafNetHandler(size_t rsize);
+        LeafNetHandler();
         ~LeafNetHandler();
 
         virtual void init();

@@ -78,7 +78,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\handle\LoginHandler.cpp" />
+    <ClCompile Include="src\handle\LoginHandle.cpp" />
     <ClCompile Include="src\LeafNetHandler.cpp" />
     <ClCompile Include="src\proto\C2SChat.pb.cc" />
     <ClCompile Include="src\proto\C2SLogin.pb.cc" />
@@ -92,7 +92,7 @@
     <ClCompile Include="src\StringUtil.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\handle\LoginHandler.h" />
+    <ClInclude Include="src\handle\LoginHandle.h" />
     <ClInclude Include="src\LeafNetHandler.h" />
     <ClInclude Include="src\proto\C2SChat.pb.h" />
     <ClInclude Include="src\proto\C2SLogin.pb.h" />

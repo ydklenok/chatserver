@@ -12,7 +12,7 @@ public:
         RegistEvent(ChatHandle, C2S_Chat);
 
 protected:
-        void handle(string &content);
+        void handle(BufferEvent *bev, string &content);
 private:
 
 };

@@ -1,7 +1,7 @@
 #include "ChatHandle.h"
 #include "../proto/C2SChat.pb.h"
 
-void ChatHandle::handle(string &content)
+void ChatHandle::handle(BufferEvent* bev, string &content)
 {
         C2SChat c2schat;
         bool suc = false;

@@ -1,7 +1,6 @@
 #include "LeafNetHandler.h"
 
-LeafNetHandler::LeafNetHandler(size_t rsize)
-        :NetHandler(rsize)
+LeafNetHandler::LeafNetHandler()
 {
         
 }

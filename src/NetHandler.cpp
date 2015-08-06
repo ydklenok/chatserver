@@ -3,23 +3,15 @@
 static void accept_conn_cb(struct evconnlistener *listener, evutil_socket_t fd, struct sockaddr *address, int socklen, void *ctx);
 static void accept_error_cb(struct evconnlistener *listener, void *ctx);
 
-static void conn_read_cb(struct bufferevent *bev, void *ctx);
-static void conn_event_cb(struct bufferevent *bev, short events, void *ctx);
+static void conn_read_cb(BufferEvent *bev, void *ctx);
+static void conn_event_cb(BufferEvent *bev, short events, void *ctx);
 
-NetHandler::NetHandler(size_t rsize)
-        :rsize_(rsize)
+NetHandler::NetHandler()
 {
 #ifdef _WIN32
         WSADATA wsaData;
         WSAStartup(MAKEWORD(2, 2), &wsaData);
 #endif
-        rbuf_ = new (nothrow) char[rsize_];
-        if(rbuf_ == NULL)
-        {
-                cout << "Cannot allocate memory for read buffer!" << endl;
-                exit(1);
-        }
-
         base_ = event_base_new();
         if (!base_)
         {
@@ -45,7 +37,7 @@ void NetHandler::loop()
 
 int NetHandler::createConnection(string host, int port)
 {
-        struct bufferevent *bev;
+        BufferEvent *bev;
         char port_str[64] = {0};
         struct addrinfo hints, *res, *ressave;
 
@@ -128,27 +120,22 @@ int NetHandler::createListen(int port)
         return 0;
 }
 
-bool NetHandler::write(int fd, const void *data, size_t size)
+bool NetHandler::write(BufferEvent *bev, const void *data, size_t size)
 {
-        hash_map<int, struct bufferevent*>::iterator it = bevMap_.find(fd);
-        if(it != bevMap_.end())
+        if(!bev)
         {
-                struct bufferevent *bev = it->second;
-                int ret = bufferevent_write(bev, data, size);
-                if(ret == 0)
-                {
-                        return true;
-                }
-                else
-                {
-                        cout << "write error." << endl;
-                        removeConnection(fd);
-                        return false;
-                }
+                return false;
+        }
+
+        int ret = bufferevent_write(bev, data, size);
+        if(ret == 0)
+        {
+                return true;
         }
         else
         {
-                cout << "can not find bev at " << fd << endl;
+                cout << "write error at bev=[" << bev << "]" << endl;
+                ph_->peerLogout(bev);
                 return false;
         }
 }
@@ -157,12 +144,10 @@ void NetHandler::onAccept(struct evconnlistener *listener, evutil_socket_t fd, s
 {
         /* We got a new connection! Set up a bufferevent for it. */
         struct event_base *base = evconnlistener_get_base(listener);
-        struct bufferevent *bev = bufferevent_socket_new(base, fd, BEV_OPT_CLOSE_ON_FREE);
+        BufferEvent *bev = bufferevent_socket_new(base, fd, BEV_OPT_CLOSE_ON_FREE);
 
         bufferevent_setcb(bev, conn_read_cb, NULL, conn_event_cb, this);
         bufferevent_enable(bev, EV_READ);
-
-        bevMap_[fd] = bev;
 }
 void NetHandler::onErrorAccept(struct evconnlistener *listener)
 {
@@ -173,7 +158,7 @@ void NetHandler::onErrorAccept(struct evconnlistener *listener)
         exit(-1);
 }
 
-void NetHandler::onEvent(struct bufferevent *bev, short events)
+void NetHandler::onEvent(BufferEvent *bev, short events)
 {
         if (events & BEV_EVENT_ERROR)
         {
@@ -187,17 +172,16 @@ void NetHandler::onEvent(struct bufferevent *bev, short events)
 
         if(events & BEV_EVENT_CONNECTED)
         {
-                int fd = bufferevent_getfd(bev);
-                bevMap_.insert(make_pair(fd, bev));
+                
         }
 
         if (events & (BEV_EVENT_EOF | BEV_EVENT_ERROR))
         {
-                removeConnection(bev);
+                ph_->peerLogout(bev);
         }
 }
 
-void NetHandler::onRead(struct bufferevent *bev)
+void NetHandler::onRead(BufferEvent *bev)
 {
         struct evbuffer *input = bufferevent_get_input(bev);
 
@@ -208,15 +192,30 @@ void NetHandler::onRead(struct bufferevent *bev)
                 if(ret == -1)
                 {
                         cout << "parser record error." << endl;
-                        removeConnection(bev);
+                        if(ph_)
+                        {
+                                ph_->peerLogout(bev);
+                        }
+                        else
+                        {
+                                cout << "ProtocolHandler is null." << endl;
+                        }
                 }
                 else if(ret == 0)
+                {
                         break;
+                }
                 else
+                {
                         if(ph_)
-                                ph_->dispatch(record);
+                        {
+                                ph_->dispatch(bev, record);
+                        }
                         else
+                        {
                                 cout << "ProtocolHandler is null." << endl;
+                        }
+                }
         }
 }
 
@@ -254,43 +253,31 @@ int NetHandler::parserRecord(struct evbuffer *buf, string &record)
         /* Convert len_buf into host order */
         record_len = ntohl(record_len);
 
-        if(record_len > rsize_)
+        if(record_len > LEAF_READ_SIZE_MAX)
+        {
+                cout << "record length > " << LEAF_READ_SIZE_MAX << endl;
                 return -1; /* record length too large. */
+        }
 
         if(buffer_len < record_len + RECORD_HEADER_LEN)
                 return 0; /* The record hasn't arrived. */
 
         /* Okay, _now_ we can remove the record. */
         evbuffer_drain(buf, RECORD_HEADER_LEN);
-        evbuffer_remove(buf, rbuf_, record_len);
 
-        record = string(rbuf_, record_len);
+        char rbuf[LEAF_READ_SIZE_MAX] = {0};
+        evbuffer_remove(buf, &rbuf, record_len);
+        record = string(rbuf, record_len);
 
         return 1;
 }
 
-void NetHandler::removeConnection(struct bufferevent *bev)
+void NetHandler::freeBufferEvent(BufferEvent *bev)
 {
-        int fd = bufferevent_getfd(bev);
-        removeConnection(fd);
+        bufferevent_free(bev);
 }
 
-void NetHandler::removeConnection(int fd)
-{
-        hash_map<int, struct bufferevent*>::iterator it = bevMap_.find(fd);
-        if(it != bevMap_.end())
-        {
-                struct bufferevent *bev = it->second;
-                bufferevent_free(bev);
-                bevMap_.erase(it);
-                if(ph_)
-                {
-                        ph_->peerLogout(fd);
-                }
-        }
-}
-
-static void conn_read_cb(struct bufferevent *bev, void *ctx)
+static void conn_read_cb(BufferEvent *bev, void *ctx)
 {
         /* This callback is invoked when there is data to read on bev. */
         NetHandler *nh = (NetHandler*)ctx;
@@ -300,7 +287,7 @@ static void conn_read_cb(struct bufferevent *bev, void *ctx)
         }
 }
 
-static void conn_event_cb(struct bufferevent *bev, short events, void *ctx)
+static void conn_event_cb(BufferEvent *bev, short events, void *ctx)
 {
         NetHandler *nh = (NetHandler*)ctx;
         if(nh)

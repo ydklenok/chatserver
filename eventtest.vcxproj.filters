@@ -48,14 +48,14 @@
     <ClCompile Include="src\LeafNetHandler.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="src\handle\LoginHandler.cpp">
-      <Filter>源文件\handle</Filter>
-    </ClCompile>
     <ClCompile Include="src\proto\C2SChat.pb.cc">
       <Filter>源文件\proto</Filter>
     </ClCompile>
     <ClCompile Include="src\proto\C2SLogin.pb.cc">
       <Filter>源文件\proto</Filter>
+    </ClCompile>
+    <ClCompile Include="src\handle\LoginHandle.cpp">
+      <Filter>源文件\handle</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -89,14 +89,14 @@
     <ClInclude Include="src\LeafNetHandler.h">
       <Filter>源文件</Filter>
     </ClInclude>
-    <ClInclude Include="src\handle\LoginHandler.h">
-      <Filter>源文件\handle</Filter>
-    </ClInclude>
     <ClInclude Include="src\proto\C2SChat.pb.h">
       <Filter>源文件\proto</Filter>
     </ClInclude>
     <ClInclude Include="src\proto\C2SLogin.pb.h">
       <Filter>源文件\proto</Filter>
+    </ClInclude>
+    <ClInclude Include="src\handle\LoginHandle.h">
+      <Filter>源文件\handle</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -6,11 +6,10 @@
 
 using namespace std;
 
-#define LEAF_READ_SIZE_MAX (2048)
 int main(int argc, char *argv[])
 {
-        LeafNetHandler *nh = new LeafNetHandler(LEAF_READ_SIZE_MAX);
+        LeafNetHandler *nh = new LeafNetHandler();
         LeafProtocolHandler *cph = new LeafProtocolHandler(nh);
         cph->loop();
-		return 0;
+        return 0;
 }

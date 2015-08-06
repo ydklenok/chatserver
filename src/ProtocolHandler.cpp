@@ -8,12 +8,21 @@ ProtocolHandler::ProtocolHandler(NetHandler *nh)
 
 ProtocolHandler::~ProtocolHandler()
 {
-        hash_map<string, set<string>*>::iterator it = gid_pids_map_.begin();
-        for(; it != gid_pids_map_.end(); it++)
+        hash_map<string, set<BufferEvent*>*>::iterator it = gid_bevs_map_.begin();
+        for(; it != gid_bevs_map_.end(); it++)
         {
+                set<BufferEvent*> *bevs = it->second;
+                set<BufferEvent*>::iterator bevit = bevs->begin();
+                for(; bevit != bevs->end(); bevit++)
+                {
+                        nh_->freeBufferEvent(*bevit);
+                }
+                bevs->clear();
                 delete it->second;
         }
+        gid_bevs_map_.clear();
         gid_pids_map_.clear();
+        pid_bev_map_.clear();
 }
 
 void ProtocolHandler::loop()
@@ -24,29 +33,30 @@ void ProtocolHandler::loop()
         nh_->loop();
 }
 
-void ProtocolHandler::peerLogin(string &gid, string &pid, int fd)
+void ProtocolHandler::peerLogin(const string gid, const string pid, BufferEvent *bev)
 {
-        if(gid == "" || pid == "" || fd <= 0)
+        if(gid == "" || pid == "" || !bev)
         {
-                cout << "Invalid param gid=" << gid << ",pid="<< pid << ",fd=" << fd  << endl;
+                cout << "Invalid param gid=" << gid << ",pid="<< pid << ",bev=null" << endl;
                 return ;
         }
 
         /* add to pids map. */
-        pid_fd_map_[pid] = fd;
+        pid_bev_map_[pid] = bev;
 
         /* add to gids map. */
-        set<string> *pids;
-        hash_map<string, set<string>*>::iterator it = gid_pids_map_.find(gid);
-        if(it == gid_pids_map_.end())
+        set<BufferEvent*> *bevs;
+        hash_map<string, set<BufferEvent*>*>::iterator it = gid_bevs_map_.find(gid);
+        if(it == gid_bevs_map_.end())
         {
-                pids = new set<string>;
+                bevs = new set<BufferEvent*>;
+                gid_bevs_map_[gid] = bevs;
         }
         else
         {
-                pids = it->second;
+                bevs = it->second;
         }
-        pids->insert(pid);
+        bevs->insert(bev);
 }
 
 void ProtocolHandler::peerLogout(string &pid)
@@ -57,54 +67,78 @@ void ProtocolHandler::peerLogout(string &pid)
                 return ;
         }
 
-        /* delete 'peer id' in the pid-fd map*/
-        hash_map<string, int>::iterator it = pid_fd_map_.find(pid);
-        if(it != pid_fd_map_.end())
+        /* delete 'peer id' in the pid-bev map and gid-bevs map*/
+        BufferEvent *bev;
+        hash_map<string, BufferEvent*>::iterator it = pid_bev_map_.find(pid);
+        if(it != pid_bev_map_.end())
         {
-                pid_fd_map_.erase(it);
+                bev = it->second;
+                pid_bev_map_.erase(it);
         }
 
-        removePidFromGroup(pid);
+        removeBufferEventFromGidMap(bev);
+
+        nh_->freeBufferEvent(bev);
 }
 
-void ProtocolHandler::peerLogout(int fd)
+void ProtocolHandler::peerLogout(BufferEvent *bev)
 {
-        hash_map<string, int>::iterator it = pid_fd_map_.begin();
-        for(; it != pid_fd_map_.end(); it++)
+        if(!bev)
         {
-                int cfd = it->second;
-                if(cfd == fd)
+                cout << "bev is null." << endl;
+                return ;
+        }
+
+        hash_map<string, BufferEvent*>::iterator it = pid_bev_map_.begin();
+        for(; it != pid_bev_map_.end(); it++)
+        {
+                BufferEvent *bev0 = it->second;
+                if(bev == bev0)
                 {
-                        string pid = it->first;
-                        removePidFromGroup(pid);
-                        pid_fd_map_.erase(it);
+                        pid_bev_map_.erase(it);
                         break;
                 }
         }
+
+        removeBufferEventFromGidMap(bev);
+
+        nh_->freeBufferEvent(bev);
 }
 
-void ProtocolHandler::removePidFromGroup(string &pid)
+void ProtocolHandler::removeBufferEventFromGidMap(BufferEvent *bev)
 {
-        /* delete peer id in the gid-pids map*/
-        hash_map<string, set<string>*>::iterator itgid = gid_pids_map_.begin();
-        for(; itgid != gid_pids_map_.end(); itgid++)
+        bool brk = false;
+        hash_map<string, set<BufferEvent*>*>::iterator bfit = gid_bevs_map_.begin();
+        for(; bfit != gid_bevs_map_.end(); bfit++)
         {
-                set<string> *uids = itgid->second;
-                uids->erase(pid);
-                if(uids->size() == 0)
+                string gid = bfit->first;
+                set<BufferEvent*> *bf = bfit->second;
+                set<BufferEvent*>::iterator setit = bf->begin();
+                for (; setit != bf->end(); setit++)
                 {
-                        delete uids;
+                        if(*setit == bev)
+                        {
+                                bf->erase(setit);
+                                if(bf->size() == 0)
+                                {
+                                        gid_bevs_map_.erase(gid);
+                                        delete bf;
+                                }
+                                brk = true;
+                        }
+                        if(brk) break;
                 }
+                if(brk) break;
         }
 }
 
 bool ProtocolHandler::sendToPeer(string &pid, const void *data, size_t size)
 {
-        hash_map<string, int>::iterator it = pid_fd_map_.find(pid);
-        if(it != pid_fd_map_.end())
+        hash_map<string, BufferEvent*>::iterator it = pid_bev_map_.find(pid);
+        if(it != pid_bev_map_.end())
         {
-                int fd = it->second;
-                return nh_->write(fd, data, size);
+                BufferEvent *bev = it->second;
+                return nh_->write(bev, data, size);
         }
         else
         {
@@ -113,20 +147,26 @@ bool ProtocolHandler::sendToPeer(string &pid, const void *data, size_t size)
         }
 }
 
+bool ProtocolHandler::sendToPeer(BufferEvent *bev, const void *data, size_t size)
+{
+        return nh_->write(bev, data, size);
+}
+
 bool ProtocolHandler::sendToGroup(string &gid, const void *data, size_t size)
 {
-        hash_map<string, set<string>*>::iterator it = gid_pids_map_.find(gid);
-        if(it != gid_pids_map_.end())
+        hash_map<string, set<BufferEvent*>*>::iterator it = gid_bevs_map_.find(gid);
+        if(it != gid_bevs_map_.end())
         {
-                set<string> *pids = it->second;
-                set<string>::iterator pidit = pids->begin();
-                for(; pidit != pids->end(); pidit++)
+                set<BufferEvent*> *bevs = it->second;
+                set<BufferEvent*>::iterator bevit = bevs->begin();
+                for(; bevit != bevs->end(); bevit++)
                 {
-                        string pid = *pidit;
-                        bool suc = sendToPeer(pid, data, size);
+                        BufferEvent* bev = *bevit;
+                        bool suc = nh_->write(bev, data, size);
                         if(!suc)
                         {
-                                cout << "send data to " << pid << "error." << endl;
+                                peerLogout(bev);
+                                cout << "send data error at gid=" << gid << endl;
                         }
                 }
         }
@@ -139,7 +179,7 @@ void ProtocolHandler::registe(Command cmd, ProcessRoutine process)
         processRoutine_[cmd] = process;
 }
 
-void ProtocolHandler::dispatch(string &record)
+void ProtocolHandler::dispatch(BufferEvent *bev, string &record)
 {
         if (record.substr(0, 22) == "<policy-file-request/>")
         {
@@ -164,11 +204,11 @@ void ProtocolHandler::dispatch(string &record)
                 if(it != processRoutine_.end())
                 {
                         ProcessRoutine process = it->second;
-                        process(content);
+                        process(bev, content);
                 }
                 else
                 {
-                        cout << "Can not find process routine at " << cmd << endl;
+                        cout << "Can not find process routine at Command[" << cmd << "]." << endl;
                 }
         }
 }
