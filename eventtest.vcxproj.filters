@@ -57,6 +57,15 @@
     <ClCompile Include="src\handle\LoginHandle.cpp">
       <Filter>源文件\handle</Filter>
     </ClCompile>
+    <ClCompile Include="src\NetThreader.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\LeafNetThreader.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Logconfig.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\ProtocolHandler.h">
@@ -97,6 +106,15 @@
     </ClInclude>
     <ClInclude Include="src\handle\LoginHandle.h">
       <Filter>源文件\handle</Filter>
+    </ClInclude>
+    <ClInclude Include="src\NetThreader.h">
+      <Filter>源文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\LeafNetThreader.h">
+      <Filter>源文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Logconfig.h">
+      <Filter>源文件</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

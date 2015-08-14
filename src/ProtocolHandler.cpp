@@ -1,9 +1,9 @@
 #include "ProtocolHandler.h"
 
-ProtocolHandler::ProtocolHandler(NetHandler *nh)
-        :nh_(nh)
+ProtocolHandler::ProtocolHandler(NetThreader *nt)
+        :nt_(nt)
 {
-        
+        logger_ = log4cxx::Logger::getLogger("ProtocolHandler");
 }
 
 ProtocolHandler::~ProtocolHandler()
@@ -15,7 +15,7 @@ ProtocolHandler::~ProtocolHandler()
                 set<BufferEvent*>::iterator bevit = bevs->begin();
                 for(; bevit != bevs->end(); bevit++)
                 {
-                        nh_->freeBufferEvent(*bevit);
+                        nt_->freeBufferEvent(*bevit);
                 }
                 bevs->clear();
                 delete it->second;
@@ -25,19 +25,11 @@ ProtocolHandler::~ProtocolHandler()
         pid_bev_map_.clear();
 }
 
-void ProtocolHandler::loop()
-{
-        this->init();
-        nh_->protocol(this);
-        nh_->init();
-        nh_->loop();
-}
-
 void ProtocolHandler::peerLogin(const string gid, const string pid, BufferEvent *bev)
 {
         if(gid == "" || pid == "" || !bev)
         {
-                cout << "Invalid param gid=" << gid << ",pid="<< pid << ",bev=null" << endl;
+                LOG4CXX_ERROR(logger_, "Invalid param gid=" << gid << ",pid="<< pid << ",bev=null");
                 return ;
         }
 
@@ -63,7 +55,7 @@ void ProtocolHandler::peerLogout(string &pid)
 {
         if(pid == "")
         {
-                cout << "pid is null." << endl;
+                LOG4CXX_ERROR(logger_, "pid is null.");
                 return ;
         }
 
@@ -78,14 +70,14 @@ void ProtocolHandler::peerLogout(string &pid)
 
         removeBufferEventFromGidMap(bev);
 
-        nh_->freeBufferEvent(bev);
+        nt_->freeBufferEvent(bev);
 }
 
 void ProtocolHandler::peerLogout(BufferEvent *bev)
 {
         if(!bev)
         {
-                cout << "bev is null." << endl;
+                LOG4CXX_ERROR(logger_, "bev is null.");
                 return ;
         }
 
@@ -102,7 +94,7 @@ void ProtocolHandler::peerLogout(BufferEvent *bev)
 
         removeBufferEventFromGidMap(bev);
 
-        nh_->freeBufferEvent(bev);
+        nt_->freeBufferEvent(bev);
 }
 
 void ProtocolHandler::removeBufferEventFromGidMap(BufferEvent *bev)
@@ -138,18 +130,18 @@ bool ProtocolHandler::sendToPeer(string &pid, const void *data, size_t size)
         if(it != pid_bev_map_.end())
         {
                 BufferEvent *bev = it->second;
-                return nh_->write(bev, data, size);
+                return true;//nh_->write(bev, data, size);
         }
         else
         {
-                cout << "can not find fd by pid[" << pid << "]" << endl;
+                LOG4CXX_ERROR(logger_, "can not find fd by pid[" << pid << "]");
                 return false;
         }
 }
 
 bool ProtocolHandler::sendToPeer(BufferEvent *bev, const void *data, size_t size)
 {
-        return nh_->write(bev, data, size);
+        return true;//nh_->write(bev, data, size);
 }
 
 bool ProtocolHandler::sendToGroup(string &gid, const void *data, size_t size)
@@ -162,11 +154,11 @@ bool ProtocolHandler::sendToGroup(string &gid, const void *data, size_t size)
                 for(; bevit != bevs->end(); bevit++)
                 {
                         BufferEvent* bev = *bevit;
-                        bool suc = nh_->write(bev, data, size);
+                        bool suc = true;//nh_->write(bev, data, size);
                         if(!suc)
                         {
                                 peerLogout(bev);
-                                cout << "send data error at gid=" << gid << endl;
+                                LOG4CXX_ERROR(logger_, "send data error at gid=" << gid);
                         }
                 }
         }
@@ -194,7 +186,7 @@ void ProtocolHandler::dispatch(BufferEvent *bev, string &record)
                 unsigned short cmd = 0;
                 if(record.size() < sizeof(unsigned short))
                 {
-                        cout << "record size less than cmd-length." << endl;
+                        LOG4CXX_ERROR(logger_, "record size less than cmd-length.");
                         return ;
                 }
                 cmd = ntohs(*((unsigned short*)record.c_str()));
@@ -208,7 +200,7 @@ void ProtocolHandler::dispatch(BufferEvent *bev, string &record)
                 }
                 else
                 {
-                        cout << "Can not find process routine at Command[" << cmd << "]." << endl;
+                        LOG4CXX_ERROR(logger_, "Can not find process routine at Command[" << cmd << "].");
                 }
         }
 }

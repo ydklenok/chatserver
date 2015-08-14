@@ -1,6 +1,11 @@
 #include "ChatHandle.h"
 #include "../proto/C2SChat.pb.h"
 
+ChatHandle::ChatHandle()
+{
+        logger_ = log4cxx::Logger::getLogger("ChatHandle");
+}
+
 void ChatHandle::handle(BufferEvent* bev, string &content)
 {
         C2SChat c2schat;
@@ -8,6 +13,6 @@ void ChatHandle::handle(BufferEvent* bev, string &content)
         suc = c2schat.ParseFromString(content);
         if(suc)
         {
-                cout << c2schat.DebugString() << endl;
+                LOG4CXX_INFO(logger_, c2schat.DebugString());
         }
 }

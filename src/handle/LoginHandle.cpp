@@ -1,6 +1,11 @@
 #include "LoginHandle.h"
 #include "../proto/C2SLogin.pb.h"
 
+LoginHandle::LoginHandle()
+{
+        logger_ = log4cxx::Logger::getLogger("LoginHandle");
+}
+
 void LoginHandle::handle(BufferEvent* bev, string &content)
 {
         C2SLogin c2slogin;
@@ -8,7 +13,7 @@ void LoginHandle::handle(BufferEvent* bev, string &content)
         suc = c2slogin.ParseFromString(content);
         if(suc)
         {
-                cout << c2slogin.DebugString() << endl;
+                LOG4CXX_INFO(logger_, c2slogin.DebugString());
                 ph_->peerLogin(c2slogin.gid(), c2slogin.uid(), bev);
         }
 }

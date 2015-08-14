@@ -3,20 +3,23 @@
 
 #include <string>
 #include <set>
+#include <log4cxx/logger.h>
+#include <event2/bufferevent.h>
+
 #include "ConstDefine.h"
 #include "Command.h"
 #include "StructUtil.h"
-#include "NetHandler.h"
+#include "NetThreader.h"
 #include <algorithm>
-#include <event2/bufferevent.h>
 
 using namespace std;
-class NetHandler;
+
+class NetThreader;
 
 class ProtocolHandler
 {
 public:
-        ProtocolHandler(NetHandler *nh);
+        ProtocolHandler(NetThreader *nt);
         virtual ~ProtocolHandler();
 
         void loop();
@@ -41,14 +44,14 @@ protected:
         /* group id, BufferEvent set.*/
         hash_map<string, set<BufferEvent*>*>    gid_bevs_map_;
 
-                
-        NetHandler      *nh_;
+        NetThreader      *nt_;
 
 private:
         void processPolicy();
         void processState();
         void removeBufferEventFromGidMap(BufferEvent *bev);
 
+        log4cxx::LoggerPtr logger_;
 };
 
 #endif

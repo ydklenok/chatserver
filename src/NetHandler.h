@@ -1,8 +1,6 @@
 #ifndef __NET_HANDLER_H_H__
 #define __NET_HANDLER_H_H__
 
-#include <iostream>
-
 #ifdef _WIN32
 #include <winsock2.h>
 #include <ws2tcpip.h>
@@ -12,47 +10,44 @@
 #endif
 
 #include <cstring>
-
-#include <event.h>
+#include <log4cxx/logger.h>
 #include <event2/buffer.h>
 #include <event2/bufferevent.h>
 #include <event2/listener.h>
+#include <pthread.h>
+#include <log4cxx/logger.h>
 
 #include "ProtocolHandler.h"
 #include "StructUtil.h"
+#include "NetThreader.h"
 
 using namespace std;
 class ProtocolHandler;
+class NetThreader;
 
 class NetHandler
 {
 public:
-        NetHandler();
-        ~NetHandler();
+        NetHandler(int port, int thread_num = 8);
+        virtual ~NetHandler();
 
-        void    protocol(ProtocolHandler *ph){ph_ = ph;};
-        void    loop();
-        bool    write(int fd, const void *data, size_t size);
-        bool    write(BufferEvent *bev, const void *data, size_t size);
-
-        void    onEvent(BufferEvent *bev, short events);
-        void    onRead(BufferEvent *bev);
+        void    start();
         void    onAccept(struct evconnlistener *listener, evutil_socket_t fd, struct sockaddr *address, int socklen);
         void    onErrorAccept(struct evconnlistener *listener);
-        void    freeBufferEvent(BufferEvent *bev);
-
-        virtual void init() = 0;
-
-protected:
-        int     createConnection(string host, int port);
-        int     createListen(int port);
-        int     parserRecord(struct evbuffer *buf, string &record);
+        virtual NetThreader* newNetThreader(socket_t fd[2]) = 0;
 
 private:
-        struct event_base       *base_;
-        ProtocolHandler         *ph_;
+        int     listenAndLoop();
+        char*   getPeerIP(int fd);
+        char*   getPeerIP(struct sockaddr *address);
 
-        const static size_t     RECORD_HEADER_LEN = 4;
+        struct event_base       *base_;
+        int                     thread_num_;
+        vector<NetThreader*>    threads_;
+        int                     last_thread_;
+        int                     port_;
+        vector<pthread_t>       pids_;
+        log4cxx::LoggerPtr      logger_;
 };
 
 #endif

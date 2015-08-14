@@ -1,8 +1,6 @@
 #ifndef __BASE_HANDLE_H_H__
 #define __BASE_HANDLE_H_H__
 
-#include <iostream>
-
 #include "../ProtocolHandler.h"
 #include "../Command.h"
 #include "../StructUtil.h"
@@ -19,9 +17,9 @@ static className* getInstance()\
         static className ins;\
         return &ins;\
 }\
-static void handle_(BufferEvent* bev, string &content)\
+static void handle_(BufferEvent* bev_, string &content)\
 {\
-        className::getInstance()->handle(bev, content);\
+        className::getInstance()->handle(bev_, content);\
 }
 
 using namespace std;

@@ -57,7 +57,7 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>./lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>ws2_32.lib;wsock32.lib;libevent.lib;libevent_core.lib;libevent_extras.lib;libprotobuf.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>ws2_32.lib;wsock32.lib;libevent.lib;libevent_core.lib;libevent_extras.lib;libprotobuf.lib;pthreadVC2.lib;log4cxx.lib;libconfig++.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -80,6 +80,9 @@
   <ItemGroup>
     <ClCompile Include="src\handle\LoginHandle.cpp" />
     <ClCompile Include="src\LeafNetHandler.cpp" />
+    <ClCompile Include="src\LeafNetThreader.cpp" />
+    <ClCompile Include="src\Logconfig.cpp" />
+    <ClCompile Include="src\NetThreader.cpp" />
     <ClCompile Include="src\proto\C2SChat.pb.cc" />
     <ClCompile Include="src\proto\C2SLogin.pb.cc" />
     <ClCompile Include="src\StructUtil.cpp" />
@@ -94,6 +97,9 @@
   <ItemGroup>
     <ClInclude Include="src\handle\LoginHandle.h" />
     <ClInclude Include="src\LeafNetHandler.h" />
+    <ClInclude Include="src\LeafNetThreader.h" />
+    <ClInclude Include="src\Logconfig.h" />
+    <ClInclude Include="src\NetThreader.h" />
     <ClInclude Include="src\proto\C2SChat.pb.h" />
     <ClInclude Include="src\proto\C2SLogin.pb.h" />
     <ClInclude Include="src\StructUtil.h" />

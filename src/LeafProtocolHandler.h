@@ -6,14 +6,14 @@
 
 #include "ConstDefine.h"
 #include "ProtocolHandler.h"
-#include "LeafNetHandler.h"
+#include "LeafNetThreader.h"
 
 using namespace std;
 
 class LeafProtocolHandler : public ProtocolHandler
 {
 public:
-        LeafProtocolHandler(LeafNetHandler *nh);
+        LeafProtocolHandler(LeafNetThreader *nt);
         ~LeafProtocolHandler(){};
 
         void init();

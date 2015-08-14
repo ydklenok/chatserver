@@ -1,17 +1,24 @@
 #include "LeafNetHandler.h"
 
-LeafNetHandler::LeafNetHandler()
+LeafNetHandler::LeafNetHandler(int port, int thread_num)
+        :NetHandler(port, thread_num)
 {
         
 }
 
 LeafNetHandler::~LeafNetHandler()
 {
-
+        
 }
 
-void LeafNetHandler::init()
+NetThreader* LeafNetHandler::newNetThreader(socket_t fd[2])
 {
-        int port = 9876;
-        createListen(port);
+        LeafNetThreader *nt;
+        LeafProtocolHandler *ph;
+
+        nt = new LeafNetThreader(fd);
+        ph = new LeafProtocolHandler(nt);
+        nt->protocol(ph);
+
+        return nt;
 }

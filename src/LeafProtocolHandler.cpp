@@ -8,8 +8,8 @@
 #include <arpa/inet.h>
 #endif
 
-LeafProtocolHandler::LeafProtocolHandler(LeafNetHandler *nh)
-        :ProtocolHandler(nh)
+LeafProtocolHandler::LeafProtocolHandler(LeafNetThreader *nt)
+        :ProtocolHandler(nt)
 {
         
 }

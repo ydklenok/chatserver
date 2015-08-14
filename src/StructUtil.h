@@ -32,4 +32,14 @@ using namespace stdext;
 #include <event2/bufferevent.h>
 typedef struct bufferevent BufferEvent;
 
+#ifdef WIN32
+#include <winsock2.h>
+typedef SOCKET socket_t;
+#define AF_LOCAL AF_INET
+int socketpair(int family, int type, int protocol, SOCKET sock[2]);
+#else
+typedef int socket_t;
+#include <sys/socket.h>
+#endif
+
 #endif
